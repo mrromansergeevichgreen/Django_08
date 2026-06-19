@@ -111,7 +111,7 @@ def register_order(request):
             quantity=product.get("quantity"),
             cost=product.get("quantity") * product_from_db.price
         )
-    coordinates = fetch_coordinates(yandex_api_key, obj.address)
+    coordinates = fetch_coordinates(yandex_api_key, order.get("address"))
     if coordinates:
         location_lon, location_lat = coordinates
     else:
