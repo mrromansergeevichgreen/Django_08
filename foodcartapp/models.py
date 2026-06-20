@@ -190,8 +190,6 @@ class Order(models.Model):
     comment = models.TextField(verbose_name='Комментарий', blank=True)
     created_at = models.DateTimeField(
         verbose_name='Заказ создан',
-        blank=True,
-        null=True,
         default=timezone.now,
         db_index=True,)
     called_at = models.DateTimeField(
