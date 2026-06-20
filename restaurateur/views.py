@@ -9,12 +9,13 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Prefetch
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.shortcuts import get_object_or_404
 
-from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
+from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem, OrderProduct
 from locations.models import Location
 
 
@@ -99,33 +100,33 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    yandex_api_key = settings.YANDEX_API_KEY
-    orders = Order.objects.all().price().prefetch_related('products').status_order()
-    restaurants = Restaurant.objects.all().prefetch_related('menu_items')
+    orders = Order.objects.prefetch_related(
+    Prefetch(
+        'order_products',
+        queryset=OrderProduct.objects.select_related('product')
+        )
+    ).price().status_order()
+    restaurants = Restaurant.objects.prefetch_related(
+        Prefetch(
+            'menu_items',
+            queryset=RestaurantMenuItem.objects.filter(
+                availability=True
+            ).select_related('product')
+        )
+    )
+    for restaurant in restaurants:
+        available_products = [menu_item.product for menu_item in restaurant.menu_items.all()]
+        restaurant.available_products = available_products
+    for order in orders:
+        available_products = [order_product.product for order_product in order.order_products.all()]
+        order.available_products = available_products
+
     for order in orders:
         available_restaurants = []
-        order_coordinates = Location.objects.filter(address=order.address).first()
-        products_in_order = order.products.values_list('product_id', flat=True)
         for restaurant in restaurants:
-            restaurant_coordinates = Location.objects.filter(address=restaurant.address).first()
-            if order_coordinates.lat and restaurant_coordinates.lat:
-                distance_to_restaurant = f"{distance.distance(
-                    (order_coordinates.lat, order_coordinates.lon),
-                    (restaurant_coordinates.lat, restaurant_coordinates.lon),
-                ).km:.3f} км"
-            else:
-                distance_to_restaurant = "Не удалось определить расстояние"
-            products_in_restaurant = restaurant.menu_items.filter(availability=True).values_list(
-                'product_id', flat=True
-            )
-            if set(products_in_order).issubset(set(products_in_restaurant)):
-                available_restaurants.append(f"{restaurant.name} - {distance_to_restaurant}")
-            if order_coordinates.lat and restaurant_coordinates.lat:
-                available_restaurants = sorted(
-                    available_restaurants,
-                    key=lambda x: int(re.search(r'\d+', x).group())
-                )
-        order.available_restaurants = available_restaurants
+            if set(order.available_products).issubset(set(restaurant.available_products)):
+                available_restaurants.append(restaurant)
+            order.available_restaurants = available_restaurants 
 
     return render(request, template_name='order_items.html', context={
         "order_items": orders,

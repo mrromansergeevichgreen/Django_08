@@ -43,7 +43,7 @@
               <summary style="display: list-item; cursor: pointer;">Рестораны</summary>
               Может быть приготовлен ресторанами:
               {% for restaurant in item.available_restaurants %}
-                <br>- {{ restaurant }}
+                <br>- {{ restaurant.name }}
               {% endfor %}
             </details>
           </td>
