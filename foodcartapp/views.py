@@ -7,8 +7,6 @@ from django.http import JsonResponse
 from django.db import transaction
 from django.templatetags.static import static
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from django.conf import settings
 
 from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import ValidationError
@@ -19,7 +17,6 @@ from rest_framework.renderers import JSONRenderer
 from .models import Product
 from .models import Order
 from .models import OrderProduct
-from .helpers_function import fetch_coordinates
 from locations.models import Location
 
 
@@ -92,7 +89,6 @@ class OrderSerializer(ModelSerializer):
 @api_view(['POST'])
 @transaction.atomic
 def register_order(request):
-    yandex_api_key = settings.YANDEX_API_KEY
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     order = serializer.validated_data
@@ -111,18 +107,8 @@ def register_order(request):
             quantity=product.get("quantity"),
             cost=product.get("quantity") * product_from_db.price
         )
-    coordinates = fetch_coordinates(yandex_api_key, order.get("address"))
-    if coordinates:
-        location_lon, location_lat = coordinates
-    else:
-        location_lon, location_lat = None, None
     Location.objects.get_or_create(
         address = order.get("address"),
-            defaults={
-                'lon': location_lon,
-                'lat': location_lat,
-                'request_at': timezone.now(),
-            }
         )
     content = OrderSerializer(order_from_db).data
     return Response(content)
