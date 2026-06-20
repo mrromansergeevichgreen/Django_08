@@ -208,7 +208,7 @@ class Order(models.Model):
         Restaurant,
         related_name='orders',
         verbose_name="ресторан",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
