@@ -3,12 +3,15 @@ import requests
 
 def fetch_coordinates(apikey, address):
     base_url = "https://geocode-maps.yandex.ru/1.x"
-    response = requests.get(base_url, params={
-        "geocode": address,
-        "apikey": apikey,
-        "format": "json",
-    })
-    response.raise_for_status()
+    try:
+        response = requests.get(base_url, params={
+            "geocode": address,
+            "apikey": apikey,
+            "format": "json",
+        })
+        response.raise_for_status()
+    except requests.exceptions.HTTPError:
+        return None
     found_places = response.json()['response']['GeoObjectCollection']['featureMember']
 
     if not found_places:
