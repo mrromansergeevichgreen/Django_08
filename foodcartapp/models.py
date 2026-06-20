@@ -180,12 +180,12 @@ class Order(models.Model):
     pay_method = models.CharField(
         max_length=20,
         db_index=True,
+        blank=True,
         verbose_name='Способ оплаты',
         choices=(
             ('online', 'Онлайн'),
             ('cash', 'наличными'),
         ),
-        default='cash',
     )
     comment = models.TextField(verbose_name='Комментарий', blank=True)
     created_at = models.DateTimeField(
