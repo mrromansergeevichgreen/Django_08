@@ -235,12 +235,15 @@ class OrderProduct(models.Model):
         related_name='order_products',
         verbose_name='продукт',
     )
-    quantity = models.IntegerField(verbose_name='количество',)
+    quantity = models.IntegerField(
+        verbose_name='количество',
+        validators=[MinValueValidator(1)],
+    )
     cost = models.DecimalField(
         verbose_name='стоимость',
         max_digits=8,
         decimal_places=2,
-        validators=[MinValueValidator(0)]
+        validators=[MinValueValidator(0)],
     )
 
 
