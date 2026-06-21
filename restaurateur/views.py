@@ -1,9 +1,7 @@
 import re
 
-import requests
 from geopy import distance
 
-from django.conf import settings
 from django import forms
 from django.shortcuts import redirect, render
 from django.views import View
@@ -17,6 +15,7 @@ from django.shortcuts import get_object_or_404
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem, OrderProduct
 from locations.models import Location
+from locations.helpers_function import save_address
 
 
 class Login(forms.Form):
@@ -136,10 +135,10 @@ def view_orders(request):
 
     for order in orders:      
         if order.address not in db_addresses:
-            Location.objects.get_or_create(address = order.address)
+            save_address(order.address)
         for restaurant in order.available_restaurants:
             if restaurant.address not in db_addresses:
-                Location.objects.get_or_create(address = restaurant.address)
+                save_address(restaurant.address)
 
     locations = {address: (lat, lon) for address, lat, lon in Location.objects.values_list('address', 'lat', 'lon')}
 

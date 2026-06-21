@@ -11,7 +11,7 @@ from .models import Restaurant
 from .models import RestaurantMenuItem
 from .models import Order
 from .models import OrderProduct
-from locations.models import Location
+from locations.helpers_function import save_address
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -137,7 +137,5 @@ class OrderAdmin(admin.ModelAdmin):
 
 
     def save_model(self, request, obj, form, change):
-        Location.objects.get_or_create(
-            address=obj.address,
-        )
+        save_address(obj.address)
         super().save_model(request, obj, form, change)
