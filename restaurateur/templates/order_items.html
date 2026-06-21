@@ -37,14 +37,14 @@
         <td>{{ item.comment }}</td>
         {% if item.restaurant %}
           <td>Готовит {{ item.restaurant }}</td>
-        {% elif not item.manger_restaurant %}
+        {% elif not item.manager_restaurant %}
           <td>Адрес не найден</td>
         {% else %}
           <td>
             <details style="border: 3px solid #e5e7eb;">
               <summary style="display: list-item; cursor: pointer;">Рестораны</summary>
               Может быть приготовлен ресторанами:
-              {% for restaurant in item.manger_restaurant %}
+              {% for restaurant in item.manager_restaurant %}
                 <br>- {{ restaurant }}
               {% endfor %}
             </details>

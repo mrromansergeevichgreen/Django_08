@@ -141,23 +141,23 @@ def view_orders(request):
             if restaurant.address not in db_addresses:
                 Location.objects.get_or_create(address = restaurant.address)
 
-    location_dict = {address: (lat, lon) for address, lat, lon in Location.objects.values_list('address', 'lat', 'lon')}
+    locations = {address: (lat, lon) for address, lat, lon in Location.objects.values_list('address', 'lat', 'lon')}
 
     for order in orders:
-        manger_restaurant = []
-        if not location_dict.get(order.address)[0]:
+        manager_restaurant = []
+        if not locations.get(order.address)[0]:
             continue
         for restaurant in order.available_restaurants:
             distance_to_restaurant = f"{distance.distance(
-                location_dict.get(order.address),
-                location_dict.get(restaurant.address),
+                locations.get(order.address),
+                locations.get(restaurant.address),
             ).km:.3f} км"
-            manger_restaurant.append(f'{restaurant.name}: {distance_to_restaurant}')
-        manger_restaurant = sorted(
-            manger_restaurant,
+            manager_restaurant.append(f'{restaurant.name}: {distance_to_restaurant}')
+        manager_restaurant = sorted(
+            manager_restaurant,
             key=lambda x: int(re.search(r'\d+', x).group())
         )
-        order.manger_restaurant = manger_restaurant
+        order.manager_restaurant = manager_restaurant
     
     return render(request, template_name='order_items.html', context={
         "order_items": orders,
