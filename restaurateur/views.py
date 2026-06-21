@@ -100,12 +100,14 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.prefetch_related(
+    
+    orders = Order.objects.prefetch_related(    
     Prefetch(
         'order_products',
         queryset=OrderProduct.objects.select_related('product')
         )
     ).price().status_order()
+    
     restaurants = Restaurant.objects.prefetch_related(
         Prefetch(
             'menu_items',
@@ -114,9 +116,11 @@ def view_orders(request):
             ).select_related('product')
         )
     )
+    
     for restaurant in restaurants:
         available_products = [menu_item.product for menu_item in restaurant.menu_items.all()]
         restaurant.available_products = available_products
+    
     for order in orders:
         available_products = [order_product.product for order_product in order.order_products.all()]
         order.available_products = available_products
@@ -128,6 +132,33 @@ def view_orders(request):
                 available_restaurants.append(restaurant)
             order.available_restaurants = available_restaurants 
 
+    db_addresses = list(Location.objects.values_list('address', flat=True))
+
+    for order in orders:      
+        if order.address not in db_addresses:
+            Location.objects.get_or_create(address = order.address)
+        for restaurant in order.available_restaurants:
+            if restaurant.address not in db_addresses:
+                Location.objects.get_or_create(address = restaurant.address)
+
+    location_dict = {address: (lat, lon) for address, lat, lon in Location.objects.values_list('address', 'lat', 'lon')}
+
+    for order in orders:
+        manger_restaurant = []
+        if not location_dict.get(order.address)[0]:
+            continue
+        for restaurant in order.available_restaurants:
+            distance_to_restaurant = f"{distance.distance(
+                location_dict.get(order.address),
+                location_dict.get(restaurant.address),
+            ).km:.3f} км"
+            manger_restaurant.append(f'{restaurant.name}: {distance_to_restaurant}')
+        manger_restaurant = sorted(
+            manger_restaurant,
+            key=lambda x: int(re.search(r'\d+', x).group())
+        )
+        order.manger_restaurant = manger_restaurant
+    
     return render(request, template_name='order_items.html', context={
         "order_items": orders,
-    })
+    })        

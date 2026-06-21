@@ -107,8 +107,5 @@ def register_order(request):
             quantity=product.get("quantity"),
             cost=product.get("quantity") * product_from_db.price
         )
-    Location.objects.get_or_create(
-        address = order.get("address"),
-        )
     content = OrderSerializer(order_from_db).data
     return Response(content)
