@@ -147,10 +147,11 @@ def view_orders(request):
         if not locations.get(order.address)[0]:
             continue
         for restaurant in order.available_restaurants:
-            distance_to_restaurant = f"{distance.distance(
+            distance_to_restaurant = distance.distance(
                 locations.get(order.address),
                 locations.get(restaurant.address),
-            ).km:.3f} км"
+            ).km
+            distance_to_restaurant = f"{distance_to_restaurant:.3f} км"
             manager_restaurant.append(f'{restaurant.name}: {distance_to_restaurant}')
         manager_restaurant = sorted(
             manager_restaurant,
