@@ -1,6 +1,7 @@
 bundles/**
 node_modules/
 media/
+datadump.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
