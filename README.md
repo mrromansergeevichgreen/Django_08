@@ -186,10 +186,11 @@ Parcel будет следить за файлами в каталоге `bundle
 
 ## Как запустить prod-версию сайта
 
-Собрать фронтенд:
+Ввести следующие команды:
 
-```sh
-./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
+```
+cd /opt
+./deploy_star_burger.sh
 ```
 
 Настроить бэкенд: создать файл `.env` в каталоге `star_burger/` со следующими настройками:
