@@ -10,7 +10,7 @@ env.read_env()
 
 YANDEX_API_KEY = env.str('YANDEX_API_KEY')
 
-ROLLBAR_ACCESS_TOKEN = env.str('ROLLBAR_ACCESS_TOKEN')
+ROLLBAR_ACCESS_TOKEN = env.str('ROLLBAR_ACCESS_TOKEN', None)
 
 ROLLBAR_ENVIRONMENT = env.str('ROLLBAR_ENVIRONMENT', 'development')
 
@@ -25,7 +25,7 @@ DEBUG = env.bool('DEBUG', True)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 
 ROLLBAR = {
-    'access_token': os.getenv('ROLLBAR_ACCESS_TOKEN'),
+    'access_token': ROLLBAR_ACCESS_TOKEN,
     'environment': ROLLBAR_ENVIRONMENT,
     'code_version': os.getenv('GIT_SHA', '1.0.0'),
     'root': BASE_DIR,
